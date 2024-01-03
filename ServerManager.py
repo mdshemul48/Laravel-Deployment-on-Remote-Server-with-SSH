@@ -11,11 +11,14 @@ class ConfigureServer:
     sftp: SFTPClient = None
     def __init__(self, remoteServerCredintials:dict):
         self.remoteServerCredintials = remoteServerCredintials
-
+        # remote server credintials
         defaultRemotePort = os.getenv("REMOTE_PORT")
         defaultRemoteUsername = os.getenv("REMOTE_USERNAME")
         defaultRemotePassword = os.getenv("REMOTE_PASSWORD")
-    
+        
+        # remote database software credintials
+        self.databasePassword = os.getenv("SOFTWARE_DATABASE_PASSWORD")
+
         remoteHost = self.remoteServerCredintials['host']
         remotePort = self.remoteServerCredintials['port'] if 'port' in self.remoteServerCredintials else defaultRemotePort
         remoteUsername = self.remoteServerCredintials['username'] if 'username' in self.remoteServerCredintials else defaultRemoteUsername
@@ -28,7 +31,7 @@ class ConfigureServer:
 
     def runCommand(self, command: str):
         try:
-            stdin, stdout, stderr = self.ssh.exec_command(f'sudo bash -c "{command}"')
+            _, stdout, stderr = self.ssh.exec_command(f'sudo bash -c "{command}"')
             exit_status = stdout.channel.recv_exit_status()
             if exit_status == 0:
                 output = stdout.read().decode('utf-8')
@@ -50,10 +53,9 @@ class ServerManager(ConfigureServer):
         self.softwareRepository = os.getenv("SOFTWARE_REPOSITORY")
         self.softwareDomain = os.getenv("SOFTWARE_MAIN_DOMAIN")
     
-    def setSoftwareConfig(self, softwareConfig: dict):
-        self.softwareName = softwareConfig['softwareName']
-        self.databasePassword = softwareConfig['databasePassword']
-        self.softwareLink = softwareConfig['softwareLink']
+    def setSoftwareName(self, softwareName:str):
+        self.softwareName = softwareName
+        self.softwareLink = f"{self.softwareName}.{self.softwareDomain}"
         self.softwarePath = f"/var/www/html/{self.softwareName}/radius-circle"
 
     def configureGit(self):
@@ -168,4 +170,3 @@ class ServerManager(ConfigureServer):
 
     def enableCertBot(self):
         self.runCommand(f"sudo certbot --apache --non-interactive --agree-tos --redirect -d {self.softwareName}.{self.softwareDomain}")
-        
