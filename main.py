@@ -26,38 +26,26 @@ def create_software(softwareCredentials: SoftwareCredentials):
             os.getenv("DATABASE_HOST_USER"), 
             os.getenv("DATABASE_HOST_PASSWORD"))
         databaseMannage.create_database(softwareCredentials.softwareName)
-        print("Database Created")
+
         cloudflareAPI = CloudflareAPI(os.getenv("CLOUDFLARE_TOKEN"), os.getenv("CLOUDFLARE_ZONE"))
         cloudflareAPI.createDNSRecord(softwareCredentials.softwareName, softwareCredentials.hostAddress)
-        print("DNS Created")
+        
         serverMenager = ServerManager({ 
             "host": softwareCredentials.hostAddress,
         })
         
         serverMenager.setSoftwareName(softwareCredentials.softwareName)
-        print("Software Name Set")
         serverMenager.configureGit()
-        print("Git Configured")
         serverMenager.createDirectoryForNewSoftware()
-        print("Directory Created")
         serverMenager.cloneProject()
-        print("Project Cloned")
         serverMenager.composerInstall()
-        print("Composer Installed")
         serverMenager.createENV()
-        print("ENV Created")
         serverMenager.laravelSetup()
-        print("Laravel Setup")
         serverMenager.createVirtualHost()
-        print("Virtual Host Created")
         serverMenager.createSupervisor()
-        print("Supervisor Created")
         serverMenager.createCronJob()
-        print("Cron Job Created")
         serverMenager.enableCertBot()
-        print("Certbot Enabled")
         serverMenager.removeGit()
-        print("Git Removed")
         
         endTime = time.time()
         totalRunTime = endTime - startTime
