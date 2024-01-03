@@ -26,6 +26,9 @@ def create_software(softwareCredentials: SoftwareCredentials):
             os.getenv("DATABASE_HOST_USER"), 
             os.getenv("DATABASE_HOST_PASSWORD"))
         databaseMannage.create_database(softwareCredentials.softwareName)
+        
+        if softwareCredentials.softwareName not in databaseMannage.databases():
+            raise Exception("Database creation failed.")
 
         cloudflareAPI = CloudflareAPI(os.getenv("CLOUDFLARE_TOKEN"), os.getenv("CLOUDFLARE_ZONE"))
         cloudflareAPI.createDNSRecord(softwareCredentials.softwareName, softwareCredentials.hostAddress)

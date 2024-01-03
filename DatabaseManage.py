@@ -9,11 +9,14 @@ class DatabaseMannage:
             password=db_password,
             port=db_port
         )
+        
     
     def create_database(self, db_name):
+        # throw error if can't create database
         mycursor = self.mydb.cursor()
-        mycursor.execute("CREATE DATABASE " + db_name)
-
+        mycursor.execute(f"CREATE DATABASE {db_name}")
+        return True
+    
     def databases(self):
         mycursor = self.mydb.cursor()
         mycursor.execute("SHOW DATABASES")
